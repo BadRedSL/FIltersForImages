@@ -47,6 +47,30 @@ class PerfectReflectorFilter : public Filter
 };
 
 
+class WaveFilter : public Filter
+{
+	QColor calcNewPixelColor(const QImage& img, int x, int y) const override;
+};
+
+
+class CarryoverFilter : public Filter
+{
+	QColor calcNewPixelColor(const QImage& img, int x, int y) const override;
+};
+
+
+class StretchingHistogramFilter : public Filter
+{
+	QColor calcNewPixelColor(const QImage& img, int x, int y) const override;
+};
+
+
+class MedianFilter : public Filter
+{
+	QColor calcNewPixelColor(const QImage& img, int x, int y) const override;
+};
+
+
 class Kernel
 {
 protected:
@@ -78,10 +102,12 @@ class MatrixFilter : public Filter
 {
 protected:
 	Kernel mKernel;
+	Kernel mKernel2=mKernel;
 	QColor calcNewPixelColor(const QImage& img, int x, int y)const override;
 
 public:
 	MatrixFilter(const Kernel& kernel) : mKernel(kernel) {};
+	MatrixFilter(const Kernel& kernel1, const Kernel&  kernel2) : mKernel(kernel1), mKernel2 (kernel2) {};
 	virtual ~MatrixFilter() = default;
 
 };
@@ -155,6 +181,45 @@ class SharpnessFilter : public MatrixFilter
 };
 
 
+class NewSharpnessKernel : public Kernel
+{
+public:
+	using Kernel::Kernel;
+	NewSharpnessKernel(std::size_t radius = 2) :Kernel(radius)
+	{
+		data[0] = -1; data[1] = -1; data[2] = -1;
+		data[3] = -1; data[4] =  9; data[5] = -1;
+		data[6] = -1; data[7] = -1; data[8] = -1;
+	}
+};
+
+class NewSharpnessFilter: public MatrixFilter
+{
+public:
+	NewSharpnessFilter(std::size_t radius = 1) : MatrixFilter(NewSharpnessKernel(radius)) {}
+};
+
+
+class EmbossingKernel : public Kernel
+{
+public:
+	using Kernel::Kernel;
+	EmbossingKernel(std::size_t radius = 2) :Kernel(radius)
+	{
+		data[0] = 0; data[1] = 1; data[2] = 0;
+		data[3] = 1; data[4] = 0; data[5] = -1;
+		data[6] = 0; data[7] = -1; data[8] = 0;
+	}
+};
+
+class EmbossingFilter: public MatrixFilter
+{
+public:
+	EmbossingFilter(std::size_t radius = 1) : MatrixFilter(EmbossingKernel(radius)) {}
+	QColor calcNewPixelColor(const QImage& img, int x, int y)const override;
+};
+
+
 class SobelXKernel : public Kernel
 {
 public:
@@ -176,20 +241,29 @@ public:
 
 class SobelYKernel: public Kernel
 {
-//public:
-//	using Kernel::Kernel;
-//	SobelYKernel(std::size_t radius = 1) :Kernel(radius)
-//	{
-//		data[0] = -1; data[1] = 0; data[2] = 1;
-//		data[3] = -2; data[4] = 0; data[5] = 2;
-//		data[6] = -1; data[7] = 0; data[8] = 1;
-//	}
+public:
+	using Kernel::Kernel;
+	SobelYKernel(std::size_t radius = 1) :Kernel(radius)
+	{
+		data[0] = -1; data[1] = 0; data[2] = 1;
+		data[3] = -2; data[4] = 0; data[5] = 2;
+		data[6] = -1; data[7] = 0; data[8] = 1;
+	}
 };
 
 class SobelYFilter : public MatrixFilter
 {
-//public:
-//	SobelYFilter(std::size_t radius = 1) : MatrixFilter(SobelYKernel(radius)) {}
+public:
+	SobelYFilter(std::size_t radius = 1) : MatrixFilter(SobelYKernel(radius)) {}
+};
+
+
+class SobelFilter : public MatrixFilter
+{
+public:
+
+	QColor calcNewPixelColor(const QImage& img, int x, int y) const override;
+	SobelFilter(std::size_t radius = 1) : MatrixFilter(SobelXKernel(radius), SobelYKernel(radius)) {}	
 };
 
 

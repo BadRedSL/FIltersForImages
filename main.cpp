@@ -26,6 +26,8 @@ void main(int argc, char *argv[])
 
     img.save("Images/Source.png");
 
+    //Common filters
+
     InvertFilter invert;
     invert.process(img).save("Images/Invert.png");
     
@@ -41,17 +43,43 @@ void main(int argc, char *argv[])
     BrightFilter bright;
     bright.process(img).save("Images/Bright.png");
 
-    PerfectReflectorFilter perfect;
-    perfect.process(img).save("Images/Perfect.png");
+    PerfectReflectorFilter perfectreflector;
+    perfectreflector.process(img).save("Images/Perfectreflector.png");
+
+    WaveFilter wave;
+    wave.process(img).save("Images/Wave.png");
+
+    CarryoverFilter carryover;
+    carryover.process(img).save("Images/Carryover.png");
+
+    StretchingHistogramFilter histogram;
+    histogram.process(img).save("Images/Historam.png");
+
+    MedianFilter median;
+    median.process(img).save("Images/Median.png");
+
+    //Matrix filters
 
     SharpnessFilter sharpness;
     sharpness.process(img).save("Images/Sharpness.png");
 
+    GaussianFilter gaussian;
+    gaussian.process(img).save("Images/Gaussian.png");
+
+    NewSharpnessFilter newsharpness;
+    newsharpness.process(img).save("Images/Newsharpness.png");
+
+    EmbossingFilter embossing;
+    embossing.process(img).save("Images/Embossing.png");
+
     SobelXFilter sobelx;
     sobelx.process(img).save("Images/Sobelx.png");
 
-    GaussianFilter gaussian;
-    gaussian.process(img).save("Images/Gaussian.png");
+    SobelFilter sobel;
+    sobel.process(img).save("Images/Sobel.png");
+
+
+    
 
 
 
