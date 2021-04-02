@@ -77,6 +77,131 @@ QImage Filter::process(const QImage& img) const
 }
 
 
+//Mathematical morphology
+
+
+QImage MatMorph::process(const QImage& img, StructuralElement& Matrix)
+{
+	QImage result = img;
+	
+	for (int x = 0; x < img.width() / 2; x++)
+		for (int y = 0; y < img.height(); y++)
+		{
+			QColor color = calcNewPixelColor(img, x, y, Matrix);
+			result.setPixelColor(x, y, color);
+		}
+
+	return result;
+}
+
+
+QColor Erosion::calcNewPixelColor(const QImage& img, int x, int y, StructuralElement& Matrix) const
+{
+	int n = 0;
+	int RMin = 255;
+	int GMin = 255;
+	int BMin = 255;
+
+	for (int i = x - (Matrix.line / 2); i <= x + (Matrix.line / 2); i++)
+		for (int j = y - (Matrix.row / 2); j <= y + (Matrix.row / 2); j++)
+		{
+				if (Matrix.data[n] && (i>0) && (j>0) && (i<img.width()) && (j<img.height()))
+				{
+					if (img.pixelColor(i, j).red() < RMin)RMin = img.pixelColor(i, j).red();
+					if (img.pixelColor(i, j).green() < GMin)GMin = img.pixelColor(i, j).green();
+					if (img.pixelColor(i, j).blue() < BMin)BMin = img.pixelColor(i, j).blue();
+				}
+				n++;
+
+		}
+	QColor color(RMin, GMin, BMin);
+	
+	return color;
+}
+
+
+QColor Dilation::calcNewPixelColor(const QImage& img, int x, int y, StructuralElement& Matrix) const
+{
+	int n = 0;
+	int RMax = 0;
+	int GMax = 0;
+	int BMax = 0;
+
+	for (int i = x - (Matrix.line / 2); i <= x + (Matrix.line / 2); i++)
+		for (int j = y - (Matrix.row / 2); j <= y + (Matrix.row / 2); j++)
+		{
+			if (Matrix.data[n] && (i > 0) && (j > 0) && (i < img.width()) && (j < img.height()))
+			{
+				if (img.pixelColor(i, j).red() > RMax)RMax = img.pixelColor(i, j).red();
+				if (img.pixelColor(i, j).green() > GMax)GMax = img.pixelColor(i, j).green();
+				if (img.pixelColor(i, j).blue() > BMax)BMax = img.pixelColor(i, j).blue();
+			}
+			n++;
+
+		}
+	QColor color(RMax, GMax, BMax);
+
+	return color;
+}
+
+
+QImage Opening::process(const QImage& img, StructuralElement& Matrix)
+{
+	QImage newImage = img;
+	Erosion erosia;
+	Dilation dilatia;
+	newImage = dilatia.process(erosia.process(newImage));
+	return newImage;
+	
+}
+
+
+QImage Closing::process(const QImage& img, StructuralElement& Matrix)
+{
+	QImage newImage = img;
+	Erosion erosia;
+	Dilation dilatia;
+	newImage = erosia.process(dilatia.process(newImage));
+	return newImage;
+
+}
+
+
+QColor Grad::calcNewPixelColor(const QImage& img, int x, int y, StructuralElement& Matrix) const
+{
+	int n = 0;
+	int RMax = 0;
+	int GMax = 0;
+	int BMax = 0;
+	int RMin = 255;
+	int GMin = 255;
+	int BMin = 255;
+
+	for (int i = x - (Matrix.line / 2); i <= x + (Matrix.line / 2); i++)
+		for (int j = y - (Matrix.row / 2); j <= y + (Matrix.row / 2); j++)
+		{
+			if (Matrix.data[n] && (i > 0) && (j > 0) && (i < img.width()) && (j < img.height()))
+			{
+				if (img.pixelColor(i, j).red() > RMax)RMax = img.pixelColor(i, j).red();
+				if (img.pixelColor(i, j).green() > GMax)GMax = img.pixelColor(i, j).green();
+				if (img.pixelColor(i, j).blue() > BMax)BMax = img.pixelColor(i, j).blue();
+
+				if (img.pixelColor(i, j).red() < RMin)RMin = img.pixelColor(i, j).red();
+				if (img.pixelColor(i, j).green() < GMin)GMin = img.pixelColor(i, j).green();
+				if (img.pixelColor(i, j).blue() < BMin)BMin = img.pixelColor(i, j).blue();
+			}
+			n++;
+
+		}
+	QColor color(RMax-RMin, GMax-GMin, BMax-BMin);
+
+	return color;
+}
+
+
+//Point filters
+
+
 QColor InvertFilter::calcNewPixelColor(const QImage& img, int x, int y) const
 {
 	QColor color = img.pixelColor(x, y);

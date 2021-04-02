@@ -14,6 +14,88 @@ public:
 };
 
 
+//Mathematical morphology
+
+
+class StructuralElement
+{
+public:
+
+	std::unique_ptr<bool[]>data;
+	int size;
+	int line;
+	int row;
+
+	StructuralElement()
+	{
+		size = 9;
+		line = 3;
+		row = 3;
+
+		data = std::make_unique<bool[]>(9);
+		for (int i = 0; i < 9; i++)
+			data[i] = 1;
+	}
+
+	template <size_t N>
+	StructuralElement(bool (&origin) [N], int line)
+	{
+		size = N;
+		this->line = line;
+		row = size / line;
+		data = std::make_unique<bool[]>(size);
+		for (int i = 0; i < size; i++)
+			data[i] = origin[i];
+	}
+
+};
+
+
+class MatMorph
+{
+protected:
+	virtual QColor calcNewPixelColor(const QImage& img, int x, int y, StructuralElement& Matrix) const = 0;
+public:
+	virtual ~MatMorph() = default;
+	virtual QImage process(const QImage & img, StructuralElement& Matrix = StructuralElement());
+};
+
+
+class Erosion : public MatMorph
+{
+	 QColor calcNewPixelColor(const QImage& img, int x, int y, StructuralElement& Matrix) const override;
+};
+
+
+class Dilation : public MatMorph
+{
+	QColor calcNewPixelColor(const QImage& img, int x, int y, StructuralElement& Matrix) const override;
+};
+
+
+class Opening : public Erosion
+{
+public:
+	QImage process(const QImage& img, StructuralElement& Matrix = StructuralElement()) override;
+};
+
+
+class Closing : public Dilation
+{
+public:
+	QImage process(const QImage& img, StructuralElement& Matrix = StructuralElement()) override;
+};
+
+
+class Grad : public MatMorph
+{
+	QColor calcNewPixelColor(const QImage& img, int x, int y, StructuralElement& Matrix) const override;
+};
+
+
+//Point filters
+
+
 class InvertFilter : public Filter
 {
 	QColor calcNewPixelColor(const QImage& img, int x, int y) const override;
@@ -69,6 +151,9 @@ class MedianFilter : public Filter
 {
 	QColor calcNewPixelColor(const QImage& img, int x, int y) const override;
 };
+
+
+//Matrix filters
 
 
 class Kernel

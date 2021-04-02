@@ -8,7 +8,7 @@
 void main(int argc, char *argv[])
 {
     std::string s;
-    QImage img;
+    QImage img, binaryimage;
 
 
 
@@ -23,7 +23,9 @@ void main(int argc, char *argv[])
     //std::cout << s;
 
     img.load(QString(s.c_str()));
+    binaryimage.load(QString("D:\\random\\Pictures\\Binary.PNG"));
 
+    binaryimage.save(QString("Images/BinarySourse.png"));
     img.save("Images/Source.png");
 
     //Common filters
@@ -56,7 +58,7 @@ void main(int argc, char *argv[])
     histogram.process(img).save("Images/Historam.png");
 
     MedianFilter median;
-    median.process(img).save("Images/Median.png");
+    median.process(binaryimage).save("Images/Median.png");
 
     //Matrix filters
 
@@ -78,9 +80,19 @@ void main(int argc, char *argv[])
     SobelFilter sobel;
     sobel.process(img).save("Images/Sobel.png");
 
-
+    Erosion erosia;
+    erosia.process(binaryimage).save("Images/Erosion.png");
     
+    Dilation dilatia;
+    dilatia.process(binaryimage).save("Images/Dilation.png");
+    
+    Opening openpicture;
+    openpicture.process(binaryimage).save("Images/Openpicture.png");
 
+    Closing closepicture;
+    closepicture.process(binaryimage).save("Images/Closepicture.png");
 
+    Grad gradient;
+    gradient.process(binaryimage).save("Images/Gradient.png");
 
 }
